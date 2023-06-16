@@ -46,7 +46,7 @@ podTemplate(cloud: 'kubernetes', label: 'packer', showRawYaml: false, yaml: temp
             
             stage("Packer"){
                 sh "packer build -var 'jenkins_build_number=${buildNumber}' packer.pkr.hcl"
-                build job: 'terraform', parameters: [string(name: 'action', value: 'apply'), string(name: region, value: "${region}"), string(name: 'ami_name', value: "my-ami-${buildNumber}"), string(name: 'az', value: "${region}b"), string(name: 'key_pair', value: "${key_pair})]
+                build job: 'terraform', parameters: [string(name: 'action', value: 'apply'), string(name: region, value: "${region}"), string(name: 'ami_name', value: "my-ami-${buildNumber}"), string(name: 'az', value: "${region}b"), string(name: 'key_pair', value: "${key_pair"})]
             }
             }
         }
