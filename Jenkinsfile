@@ -1,4 +1,3 @@
-
 template = '''
 apiVersion: v1
 kind: Pod
@@ -16,31 +15,28 @@ spec:
     '''
 
 def buildNumber = env.BUILD_NUMBER
-
-
-if ( env.BRANCH_NAME == "main" ){
-    region = "us-east-1"
-}
-else if ( env.BRANCH_NAME == "qa"){
-    region = "us-east-2"
-}
-else if ( env.BRANCH_NAME == "dev"){
-    region = "us-west-1"
-}
-
-
+properties([
+    parameters([
+        choice(choices: [
+            'us-east-1', 
+            'us-east-2', 
+            'us-west-1', 
+            'us-west-2'], 
+            name: 'region')
+            ])
+            ])
 
 podTemplate(cloud: 'kubernetes', label: 'packer', showRawYaml: false, yaml: template) {
     node("packer"){
         container("packer"){
 
         withCredentials([usernamePassword(credentialsId: 'aws-creds', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
-            withEnv(["AWS_REGION=${region}"]) {
-            
+            withEnv(["AWS_REGION=${params.region}"]) {
+
             stage("Git Clone"){
                 git branch: 'main', url: 'https://github.com/lolacola/jenkins-packer.git'
             }
-            
+
             stage("Packer"){
                 sh "packer build -var 'jenkins_build_number=${buildNumber}' packer.pkr.hcl"
             }
