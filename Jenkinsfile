@@ -20,12 +20,15 @@ def buildNumber = env.BUILD_NUMBER
 
 if ( env.BRANCH_NAME == "main" ){
     region = "us-east-1"
+    key_pair = "lola-mac"
 }
 else if ( env.BRANCH_NAME == "qa"){
     region = "us-east-2"
+    key_pair = "my-laptop-key"
 }
 else if ( env.BRANCH_NAME == "dev"){
     region = "us-west-1"
+    key_pair = "EvolveCyberKeyAWS"
 }
 
 
@@ -43,6 +46,7 @@ podTemplate(cloud: 'kubernetes', label: 'packer', showRawYaml: false, yaml: temp
             
             stage("Packer"){
                 sh "packer build -var 'jenkins_build_number=${buildNumber}' packer.pkr.hcl"
+                build job: 'terraform', parameters: [string(name: 'action', value: 'apply'), string(name: region, value: "${region}"), string(name: 'ami_name', value: "my-ami-${buildNumber}"), string(name: 'az', value: "${region}b"), string(name: 'key_pair', value: "${key_pair})]
             }
             }
         }
